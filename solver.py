@@ -1,7 +1,9 @@
 import itertools
+import time
 from typing import Tuple, List
 
 import search
+from scrape import scrapeForPuzzle, splitStringIntoGrid
 from search import SolutionState, dfs
 
 
@@ -29,6 +31,10 @@ def solve(grid):
 
     root = SolutionState(solutionList, solutionListForEachRow)
     dfs(root)
+    solutions = []
+    for solution in search.solutionLists:
+        solutions.append(solution.chosenSolutionList)
+    return solutions
 
 def filterForRemainingSolutions(chosenString, solutionList:List[str]):
     usedCharacterIndex = enumerateCharacterIndexFromString(chosenString)
@@ -68,25 +74,35 @@ def getAllColumn(grid):
     return [getColumn(grid, i) for i in range(len(grid[0]))]
 
 
+def solveTodaysPuzzle():
+    puzzleGrid = scrapeForPuzzle()
+    print("Puzzle grid:")
+    print(puzzleGrid)
+    correctSolutions = solve(puzzleGrid)
+    print("Solutions:")
+    return correctSolutions
+
 if __name__ == '__main__':
-    # grid = [
-    #     ['S', 'E', 'I', 'F', 'R'],
-    #     ['C', 'H', 'W', 'I', 'W'],
-    #     ['A', 'T', 'A', 'E', 'T'],
-    #     ['B', 'W', 'R', 'A', 'E'],
-    #     ['W', 'O', 'E', 'L', 'Y']
-    # ]
+    # print(solveTodaysPuzzle())
 
-    grid = [
-        ['S', 'N', 'T', 'A', 'R'],
-        ['A', 'L', 'U', 'I', 'D'],
-        ['T', 'T', 'O', 'S', 'L'],
-        ['U', 'O', 'D', 'W', 'E'],
-        ['M', 'R', 'A', 'R', 'K']
-    ]
-    solve(grid)
+    message = """Press 1 or 2 to select an option:
+1. Solve todays puzzle
+2. Solve a custom puzzle
+    """
+    print(message)
+    option = int(input())
+    while option != 1 and option != 2:
+        print("Invalid option. Please enter 1 or 2")
+        option = int(input())
 
-    correctSolutions = search.solutionLists
-
-    for i in correctSolutions:
-        print(i.chosenSolutionList)
+    if option == 1:
+        print("Solving todays puzzle...")
+        #Avoid potential loading issues with selenium
+        time.sleep(1)
+        print(solveTodaysPuzzle())
+    elif option == 2:
+        print("Enter the grid as a string, line by line. e.g sntar aluid ttosl uodwe mrark")
+        string = input().replace(" ", "")
+        grid = splitStringIntoGrid(string)
+        print("Solutions:")
+        print(solve(grid))
